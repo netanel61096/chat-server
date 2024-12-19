@@ -1,0 +1,16 @@
+# תלותים של Node.js
+node_modules/
+
+# קבצי לוג
+*.log
+
+# קבצי בנייה
+dist/
+build/
+
+# קבצי מערכת
+.DS_Store
+Thumbs.db
+
+# משתני סביבה
+.env
