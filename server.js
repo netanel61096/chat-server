@@ -1,12 +1,19 @@
+import userRoutes from './routes/userRoutes'
+
 const express = require("express");
-const http = require("http");
-const { Server } = require("socket.io");
-const mongoose = require("mongoose");
+const connectDB = require("./db"); 
+const PORT = process.env.PORT || 4000;
+
+
+connectDB(); 
 
 const app = express();
-const server = http.createServer(app);
+app.use(express.json())
 
 
-server.listen(3000, () => {
-  console.log("Server is running on http://localhost:3000");
+app.use('/api/users',userRoutes)
+ 
+
+server.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
 });
