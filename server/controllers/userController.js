@@ -73,5 +73,28 @@ export const getAllUsers = async (req, res) => {
   }
 };
 
+export const updateUser = async (req, res) => {
+  const { id } = req.params; // שליפת מזהה המשתמש מהנתיב
+  const updates = req.body; // הנתונים לעדכון
+
+  try {
+    // חיפוש ועדכון המשתמש
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      updates,
+      { new: true, runValidators: true } // החזרת המידע המעודכן והרצת ולידציות
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json(updatedUser); // החזרת המשתמש המעודכן
+  } catch (error) {
+    res.status(500).json({ message: "Error updating user", error: error.message });
+  }
+};
+
+
 
 
