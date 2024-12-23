@@ -1,20 +1,44 @@
 import Room from "../models/roomModel.js";
 import Message from "../models/messageModel.js";
-import mongoose from 'mongoose'
+import mongoose from "mongoose";
 
 export const getChats = async (req, res) => {
-  const userId = req.user.id; // מתוך ה-Token (המשתמש המחובר)
+  const userId = req.user.id;
 
   try {
-    // 1. מציאת חדרים שהמשתמש הוא משתתף בהם
-    const rooms = await Room.find({ participants: userId });
+    // מציאת חדרים שהמשתמש משתתף בהם עם ה-ID וה-username של המשתמשים
+    const rooms = await Room.aggregate([
+      {
+        $match: { participants: new mongoose.Types.ObjectId(userId) }, // חדרים עם המשתמש המחובר
+      },
+      {
+        $lookup: {
+          from: "users", // חיבור לאוסף המשתמשים
+          localField: "participants", // רשימת ה-ID של המשתתפים
+          foreignField: "_id", // מזהי המשתמשים
+          as: "participantDetails", // שם השדה החדש שייווצר
+        },
+      },
+      {
+        $project: {
+          name: 1,
+          description: 1,
+          createdBy: 1,
+          participants: {
+            $map: {
+              input: "$participantDetails",
+              as: "participant",
+              in: {
+                id: "$$participant._id",
+                username: "$$participant.username",
+              },
+            },
+          }, // החלפת ה-ID והוספת ה-username
+        },
+      },
+    ]);
 
-    // 2. מציאת צ'אטים פרטיים (משתמשים שהייתה איתם תקשורת)
-    console.log("User ID:", userId);
-    const messages = await Message.find({
-      $or: [{ senderId: userId }, { receiverId: userId }],
-    });
-    console.log("Messages:", messages);
+    // מציאת צ'אטים פרטיים
     const privateChats = await Message.aggregate([
       {
         $match: {
@@ -25,7 +49,7 @@ export const getChats = async (req, res) => {
                 { receiverId: new mongoose.Types.ObjectId(userId) },
               ],
             },
-            { roomId: null }, // סינון הודעות פרטיות בלבד
+            { roomId: null },
           ],
         },
       },
@@ -50,27 +74,26 @@ export const getChats = async (req, res) => {
           as: "userDetails",
         },
       },
+      {
+        $match: {
+          userDetails: { $ne: [] },
+        },
+      },
     ]);
-    
-    console.log("Private Chats:", privateChats);
-    
-    
-    
 
-    // 3. החזרת הנתונים
     res.status(200).json({
       rooms,
       privateChats: privateChats.map((chat) => ({
-        myId:userId,
+        myId: userId,
         userId: chat._id,
-        userName:chat.username,
-        lastMessage:chat.lastMessage,
+        userName: chat.userDetails[0]?.username,
+        lastMessage: chat.lastMessage,
         userDetails: chat.userDetails[0],
-        timeSendLastMesagge:chat.timestamp,
-        type:"privateChat"
+        timeSendLastMessage: chat.timestamp,
+        type: "privateChat",
       })),
     });
   } catch (error) {
-    res.status(500).json({ message: "Error fetching chats", error: error.message  });
+    res.status(500).json({ message: "Error fetching chats", error: error.message });
   }
 };

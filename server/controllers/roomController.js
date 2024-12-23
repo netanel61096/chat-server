@@ -63,7 +63,6 @@ export const updateRoom = async (req, res) => {
   }
 };
 
-// מחיקת חדר
 export const deleteRoom = async (req, res) => {
   const { id } = req.params;
 
@@ -77,25 +76,23 @@ export const deleteRoom = async (req, res) => {
   }
 };
 
-// הוספת משתמש לחדר
 export const addUserToRoom = async (req, res) => {
-    const { roomId } = req.params; // מזהה החדר
-    const { userId } = req.body;   // מזהה המשתמש להוספה
+    const { roomId } = req.params;
+    const { userId } = req.body;   
   
     try {
-      // 1. בדוק שהחדר קיים
+
       const room = await Room.findById(roomId);
       if (!room) {
         return res.status(404).json({ message: "Room not found" });
       }
-  
-      // 2. בדוק שהמשתמש קיים
+
       const user = await User.findById(userId);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
   
-      // 3. הוספת המשתמש לרשימת המשתתפים אם הוא לא קיים שם
+
       if (!room.participants.includes(userId)) {
         room.participants.push(userId);
         await room.save();
