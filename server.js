@@ -19,7 +19,7 @@ connectDB();
 const app = express();
 
 app.use(cors({
-  origin: "http://localhost:3000", // כתובת ה-Frontend שמורשה לגשת לשרת
+  origin: "*", // כתובת ה-Frontend שמורשה לגשת לשרת
   methods: ["GET", "POST", "PUT", "DELETE"], // שיטות HTTP שמורשות
   credentials: true, // אם נדרש לשלוח עוגיות או פרטי התחברות
 }));
@@ -37,7 +37,7 @@ const server = http.createServer(app);
 // חיבור Socket.IO לשרת
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000", // כתובת ה-Frontend
+    origin: "*", // כתובת ה-Frontend
     methods: ["GET", "POST"],
   },
 });
