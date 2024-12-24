@@ -6,17 +6,16 @@ export const getChats = async (req, res) => {
   const userId = req.user.id;
 
   try {
-    // מציאת חדרים שהמשתמש משתתף בהם עם ה-ID וה-username של המשתמשים
     const rooms = await Room.aggregate([
       {
-        $match: { participants: new mongoose.Types.ObjectId(userId) }, // חדרים עם המשתמש המחובר
+        $match: { participants: new mongoose.Types.ObjectId(userId) }, 
       },
       {
         $lookup: {
-          from: "users", // חיבור לאוסף המשתמשים
-          localField: "participants", // רשימת ה-ID של המשתתפים
-          foreignField: "_id", // מזהי המשתמשים
-          as: "participantDetails", // שם השדה החדש שייווצר
+          from: "users", 
+          localField: "participants", 
+          foreignField: "_id", 
+          as: "participantDetails", 
         },
       },
       {
@@ -33,12 +32,11 @@ export const getChats = async (req, res) => {
                 username: "$$participant.username",
               },
             },
-          }, // החלפת ה-ID והוספת ה-username
+          }, 
         },
       },
     ]);
 
-    // מציאת צ'אטים פרטיים
     const privateChats = await Message.aggregate([
       {
         $match: {

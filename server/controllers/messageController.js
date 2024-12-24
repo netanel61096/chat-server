@@ -3,33 +3,29 @@ import messageModel from "../models/messageModel.js";
 import userModel from "../models/userModel.js";
 import roomModel from "../models/roomModel.js";
 
-// יצירת הודעה חדשה
+
 export const createMessage = async (req, res) => {
   const { senderId, receiverId, roomId, content } = req.body;
 
   try {
-    // 1. בדיקה ששדה 'content' לא ריק
+
     if (!content || content.trim() === "") {
       return res.status(400).json({ message: "Message content cannot be empty" });
     }
 
-    // 2. בדיקה ששדה 'senderId' לא ריק
     if (!senderId || senderId.trim() === "") {
       return res.status(400).json({ message: "Sender ID is required" });
     }
 
-    // 3. בדיקה שאו receiverId או roomId קיים
     if (!receiverId && !roomId) {
       return res.status(400).json({ message: "Either receiverId or roomId is required" });
     }
 
-    // 4. בדיקה שהשולח קיים
     const sender = await userModel.findById(senderId);
     if (!sender) {
       return res.status(404).json({ message: "Sender not found" });
     }
 
-    // 5. בדיקה שהנמען או החדר קיימים
     if (receiverId) {
       const receiver = await userModel.findById(receiverId);
       if (!receiver) {
@@ -44,7 +40,6 @@ export const createMessage = async (req, res) => {
       }
     }
 
-    // 6. יצירת הודעה חדשה
     const newMessage = new messageModel({
       senderId,
       receiverId: receiverId || null,
@@ -60,7 +55,6 @@ export const createMessage = async (req, res) => {
 };
 
 
-// שליפת הודעות לפי חדר
 export const getMessagesByRoom = async (req, res) => {
   const { roomId } = req.params;
 
@@ -72,7 +66,6 @@ export const getMessagesByRoom = async (req, res) => {
   }
 };
 
-// שליפת הודעות פרטיות בין שני משתמשים
 export const getPrivateMessages = async (req, res) => {
   const { user1Id, user2Id } = req.params;
 

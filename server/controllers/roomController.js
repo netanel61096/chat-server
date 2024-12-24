@@ -2,7 +2,6 @@ import Room from "../models/roomModel.js";
 import User from "../models/userModel.js";
 
 
-// יצירת חדר חדש
 export const createRoom = async (req, res) => {
   const { name, description, createdBy } = req.body;
 
@@ -15,7 +14,7 @@ export const createRoom = async (req, res) => {
       name,
       description,
       createdBy,
-      participants: [createdBy], // יוצר החדר נוסף כברירת מחדל
+      participants: [createdBy], 
     });
 
     await newRoom.save();
@@ -25,7 +24,6 @@ export const createRoom = async (req, res) => {
   }
 };
 
-// שליפת כל החדרים
 export const getAllRooms = async (req, res) => {
   try {
     const rooms = await Room.find().populate("createdBy").populate("participants");
@@ -35,7 +33,7 @@ export const getAllRooms = async (req, res) => {
   }
 };
 
-// שליפת חדר לפי ID
+
 export const getRoomById = async (req, res) => {
   const { id } = req.params;
 
@@ -49,7 +47,7 @@ export const getRoomById = async (req, res) => {
   }
 };
 
-// עדכון חדר
+
 export const updateRoom = async (req, res) => {
   const { id } = req.params;
 

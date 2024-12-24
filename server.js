@@ -32,30 +32,28 @@ app.use('/api/users', userRoutes)
 app.use('/api/rooms', roomRoutes)
 app.use('/api/messages', messageRoutes);
 app.use('/api', chatRoutes);
-// יצירת שרת HTTP
+
 const server = http.createServer(app);
 
-// חיבור Socket.IO לשרת
 const io = new Server(server, {
     cors: {
-        origin: "*", // כתובת ה-Frontend
+        origin: "*", 
         methods: ["GET", "POST"],
     },
 });
 
-// ניהול אירועים של Socket.IO
+
 io.on("connection", (socket) => {
     console.log("A user connected:", socket.id);
 
-    // האזנה לאירוע הצטרפות לחדר
     socket.on("join_room", (roomId) => {
-        socket.join(roomId); // המשתמש מצטרף לחדר
+        socket.join(roomId); 
         console.log(`User ${socket.id} joined room ${roomId}`);
     });
 
     socket.on("leave_room", () => {
         socket.rooms.forEach(v => {
-            socket.leave(v); // המשתמש עוזב חדר
+            socket.leave(v); 
         }
 
         )
@@ -63,27 +61,24 @@ io.on("connection", (socket) => {
     });
 
 
-    // האזנה להודעות מהלקוח
+
     socket.on("send_message", (data) => {
         const { roomId, content, receiverId, senderId } = data;
 
         const createUniqueRoomId = (userId1, userId2) => {
-            // מיון ה-IDs בסדר אלפביתי כדי לשמור על אחידות
             const sortedIds = [userId1, userId2].sort();
-            // יצירת מזהה ייחודי על ידי חיבור ה-IDs
             return `${sortedIds[0]}_${sortedIds[1]}`;
           };
 
         console.log(`Message received in room ${roomId|| receiverId}:`, content);
 
-        // שליחת ההודעה לכל הלקוחות בחדר
         if (roomId) {
-            io.to(roomId).emit("receive_message", data); // שליחת הודעה לחדר
+            io.to(roomId).emit("receive_message", data);
             console.log(roomId);
 
         }
         else if (receiverId){
-            io.to(createUniqueRoomId(receiverId, senderId)).emit("receive_message", data); // שליחת הודעה לחדר
+            io.to(createUniqueRoomId(receiverId, senderId)).emit("receive_message", data); 
             console.log(receiverId,senderId);
         }
         else {
@@ -91,12 +86,12 @@ io.on("connection", (socket) => {
         }
     });
 
-    // ניתוק
+
     socket.on("disconnect", () => {
         console.log("A user disconnected:", socket.id);
     });
 });
-// הפעלת השרת
+
 server.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
